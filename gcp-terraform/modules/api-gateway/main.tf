@@ -8,7 +8,8 @@ resource "google_api_gateway_config" "this" {
 
   openapi_documents {
     document {
-      path = var.openapi_spec
+      path     = "modules/api-gateway/openapi/yaml"
+      contents = filebase64("${path.module}/openapi.yaml")
     }
   }
 }
@@ -19,3 +20,4 @@ resource "google_api_gateway_gateway" "this" {
   api_config = google_api_gateway_api_config.this.id
   region     = var.region
 }
+
