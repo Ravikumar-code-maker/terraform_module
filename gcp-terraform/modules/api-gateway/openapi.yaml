@@ -1,0 +1,22 @@
+openapi: "3.0.0"
+info:
+  title: simple-api
+  version: "1.0.0"
+
+paths:
+  /hello:
+    get:
+      summary: Returns hello
+      operationId: hello
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+      x-google-backend:
+        address: https://34.16.105.65/hello
