@@ -11,3 +11,7 @@ backend "gcs" {
   prefix      = "gcp/inrastructure"
  }
 }
+provider "google" {
+  project = "var.project_id"
+  region  = "var.region"
+}
