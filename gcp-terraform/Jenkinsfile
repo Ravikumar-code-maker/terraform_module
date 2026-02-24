@@ -1,0 +1,56 @@
+pipeline {
+  agent any
+
+      // Trigger on GitHub push
+  triggers {
+    githubPush()
+  }
+  environment {
+    PROJECT_ID    = "project-da753822-6710-4f66-aaa"
+    TERRAFORM_DIR = "env/dev"
+  }
+  stages {
+    stage ('checkout code') {
+      steps {
+        checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Ravikumar-code-maker/terraform_module']])
+      }
+    }
+    stage ('authenticate gcp') {
+    // Load the JSON key credential
+      withCredentials([file(credentilasId: 'gcp-sa-key'), variable: 'SA_KEY'])  {
+        sh """
+          echo "Authenticating to Google Cloud..."
+          export GOOGLE_APPLICATION_CREDENTIALS="SA_KEY"
+
+          # Optional: configure the gcloud project
+          gcloud auth activate-service-account --key-file="GOOGLE_APPLICATION_CREDENTIALS"
+          gcloud config set project $PROJECT_ID
+      }
+    }
+    stage ('Terraform Init') {
+      steps {
+        dir ("${env.TERRAFORM_DIR}") {
+          sh """
+             terraform init \
+                -backend-config="bucket=tf-state-bucket"
+                -backend-config="prefix=terraform/state"
+        }
+      }
+    } 
+    stage ('Terraform Plan') {
+      steps {
+        dir("${env.TERRAFORM_DIR}") {
+          sh "terraform plan -out=tfplan"
+        }
+      }
+    }
+    stage ('Terraform apply') {
+      steps {
+        input "Approve?"
+        dir ("${env.TERRAFORM_DIR}") {
+          sh "terraform apply -auto-approve tfplan"
+        }
+      }
+    }
+  }
+}
