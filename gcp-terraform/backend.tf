@@ -7,7 +7,7 @@ terraform {
   }
 
 backend "gcs" {
-  bucket      = "tf-state-bucket"
+  bucket      = "myproject-dev-tfstate"
   prefix      = "gcp/inrastructure"
  }
 }
@@ -19,3 +19,4 @@ provider "google-beta" {
   project = var.project_id
   region  = var.region
 }
+
